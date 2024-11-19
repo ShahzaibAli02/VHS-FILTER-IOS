@@ -11,6 +11,9 @@
 		5E2A346B2CECBE5F004D7DD8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E2A346A2CECBE5F004D7DD8 /* ContentView.swift */; };
 		5E2A346D2CECBE63004D7DD8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5E2A346C2CECBE63004D7DD8 /* Assets.xcassets */; };
 		5E2A34702CECBE63004D7DD8 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5E2A346F2CECBE63004D7DD8 /* Preview Assets.xcassets */; };
+		5E2A347A2CECE13B004D7DD8 /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E2A34792CECE13B004D7DD8 /* ContentViewModel.swift */; };
+		5E2A347C2CECE1BC004D7DD8 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E2A347B2CECE1BC004D7DD8 /* ImagePicker.swift */; };
+		5E2A347E2CECE200004D7DD8 /* VideoPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E2A347D2CECE200004D7DD8 /* VideoPicker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,6 +22,11 @@
 		5E2A346A2CECBE5F004D7DD8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		5E2A346C2CECBE63004D7DD8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5E2A346F2CECBE63004D7DD8 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		5E2A34782CECC1E3004D7DD8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5E2A34792CECE13B004D7DD8 /* ContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewModel.swift; sourceTree = "<group>"; };
+		5E2A347B2CECE1BC004D7DD8 /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
+		5E2A347D2CECE200004D7DD8 /* VideoPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPicker.swift; sourceTree = "<group>"; };
+		5E2A347F2CECE729004D7DD8 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -35,6 +43,7 @@
 		5E2A345C2CECBE5F004D7DD8 = {
 			isa = PBXGroup;
 			children = (
+				5E2A347F2CECE729004D7DD8 /* README.md */,
 				5E2A34672CECBE5F004D7DD8 /* VHSEFFECT */,
 				5E2A34662CECBE5F004D7DD8 /* Products */,
 			);
@@ -51,10 +60,14 @@
 		5E2A34672CECBE5F004D7DD8 /* VHSEFFECT */ = {
 			isa = PBXGroup;
 			children = (
+				5E2A34782CECC1E3004D7DD8 /* Info.plist */,
 				5E2A34682CECBE5F004D7DD8 /* VHSEFFECTApp.swift */,
 				5E2A346A2CECBE5F004D7DD8 /* ContentView.swift */,
 				5E2A346C2CECBE63004D7DD8 /* Assets.xcassets */,
 				5E2A346E2CECBE63004D7DD8 /* Preview Content */,
+				5E2A34792CECE13B004D7DD8 /* ContentViewModel.swift */,
+				5E2A347B2CECE1BC004D7DD8 /* ImagePicker.swift */,
+				5E2A347D2CECE200004D7DD8 /* VideoPicker.swift */,
 			);
 			path = VHSEFFECT;
 			sourceTree = "<group>";
@@ -138,7 +151,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				5E2A346B2CECBE5F004D7DD8 /* ContentView.swift in Sources */,
+				5E2A347C2CECE1BC004D7DD8 /* ImagePicker.swift in Sources */,
 				5E2A34692CECBE5F004D7DD8 /* VHSEFFECTApp.swift in Sources */,
+				5E2A347E2CECE200004D7DD8 /* VideoPicker.swift in Sources */,
+				5E2A347A2CECE13B004D7DD8 /* ContentViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -272,8 +288,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"VHSEFFECT/Preview Content\"";
+				DEVELOPMENT_TEAM = VJ3BBPZBDU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VHSEFFECT/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -300,8 +319,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"VHSEFFECT/Preview Content\"";
+				DEVELOPMENT_TEAM = VJ3BBPZBDU;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VHSEFFECT/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
