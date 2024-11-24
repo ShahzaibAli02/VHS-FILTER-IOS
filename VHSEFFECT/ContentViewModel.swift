@@ -11,13 +11,16 @@ import UniformTypeIdentifiers
 import CoreImage
 import CoreImage.CIFilterBuiltins
 
-class ContentViewModel: ObservableObject {
+class ContentViewModel: NSObject, ObservableObject ,UIDocumentPickerDelegate{
     @Published var showVideoPicker = false
+    @Published var saved = false
     @Published var showImagePicker = false
     @Published var videoURL: URL?
     @Published var player: AVPlayer?
+    @Published var showLoading: Bool =  false
     @Published var selectedImage: UIImage?
 
+    private var compostion : AVMutableVideoComposition? = nil
     func pickVideo() {
         showVideoPicker = true
     }
@@ -28,12 +31,14 @@ class ContentViewModel: ObservableObject {
 
     func pickedVideo(_ url: URL) {
         videoURL = url
-        player = createPlayer(with: url)
+        player = nil
+        compostion = applyVHSVideoEffect(with: url)
+        player = createPlayer(with: url , composition: compostion)
         selectedImage = nil // Clear the selected image when a video is picked
     }
     
     func pickedImage(_ image: UIImage) {
-        
+        videoURL = nil
         if  let ciImage = CIImage(image: image) {
             let ciImageOutput =  applyVHSFilter(source:ciImage,shouldCrop: false)
             let context = CIContext(options: nil)
@@ -45,6 +50,13 @@ class ContentViewModel: ObservableObject {
             player = nil // Clear the player when an image is picked
         }
       
+    }
+    func savedSuccessfully(){
+        self.saved = true
+
+           DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+               self.saved = false
+           }
     }
     func applyVHSFilter(source : CIImage, shouldCrop : Bool = true) -> CIImage {
         // Crop to 4:3 aspect ratio
@@ -89,28 +101,163 @@ class ContentViewModel: ObservableObject {
         return  self.addTextOverlay(to: sharpened)
     }
 
-    private func createPlayer(with url: URL) -> AVPlayer? {
+    
+    private func applyVHSVideoEffect(with url: URL) -> AVMutableVideoComposition {
         print("createPlayer")
         let asset = AVAsset(url: url)
         
         let composition = AVMutableVideoComposition(asset: asset) { [self] request in
             let source = request.sourceImage
-            
-    
-            
-            // Finish the request with the processed image
             request.finish(with: applyVHSFilter(source: source), context: nil)
         }
         
-        // Set the render size and frame duration
-        composition.renderSize = CGSize(width: 360, height: 270)
-        composition.frameDuration = CMTime(value: 1, timescale: 30) // 30 fps
+//        // Set the render size and frame duration
+//        composition.renderSize = CGSize(width: 360, height: 270)
+//        composition.frameDuration = CMTime(value: 1, timescale: 30) // 30 fps
+        
+//        let playerItem = AVPlayerItem(asset: asset)
+//        playerItem.videoComposition = composition
+        return composition
+    }
+    private func createPlayer(with url: URL, composition: AVMutableVideoComposition? = nil) -> AVPlayer? {
+        let asset = AVAsset(url: url)
+        
+        
+        composition.mLet{ composition in
+            
+            composition.renderSize = CGSize(width: 360, height: 270)
+            composition.frameDuration = CMTime(value: 1, timescale: 30) // 30 fps
+           
+        }
         
         let playerItem = AVPlayerItem(asset: asset)
         playerItem.videoComposition = composition
         
         return AVPlayer(playerItem: playerItem)
     }
+    
+     func saveVideo(){
+        if let videoURL = videoURL , let composition = compostion{
+            showLoading = true
+            Task {
+                // Attempt to save modified video asynchronously
+                guard let url = await self.saveModifiedVideo(with: videoURL, composition: composition) else {
+                    // If URL is nil, hide the loading indicator and return
+                    showLoading = false
+                    return
+                }
+                
+                // Hide the loading indicator after the operation is completed
+                showLoading = false
+                print("URL -> ", url)
+                
+                // Ensure UI update happens on the main thread
+                await MainActor.run {
+                    self.saveFile(with: url)
+                }
+            }
+          
+        }
+        
+    }
+    private func saveModifiedVideo(with url: URL, composition: AVMutableVideoComposition) async -> URL?  {
+        let asset = AVAsset(url: url)
+        let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality)
+        
+        // Set the export session's output URL and file type
+        let fileManager = FileManager.default
+        let outputURL = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".mp4")
+        
+        exportSession?.outputURL = outputURL
+        exportSession?.outputFileType = .mp4
+        
+        // Apply the video composition
+        exportSession?.videoComposition = composition
+        return await withCheckedContinuation { (continuation: CheckedContinuation<URL?, Never>) in
+            exportSession?.exportAsynchronously {
+                switch exportSession?.status {
+                case .completed:
+                    continuation.resume(returning: outputURL)
+                case .failed , .cancelled:
+                    continuation.resume(returning: nil)
+                default:
+                    break
+                }
+            }
+        }
+       
+    }
+    
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+             guard let selectedURL = urls.first else {
+                 print("No destination URL selected")
+                 return
+             }
+             savedSuccessfully()
+             print("File saved successfully to: \(selectedURL.path)")
+             // You can add any additional logic here, such as updating UI or model
+         }
+    
+    func saveImage(){
+        
+        if let selectedImage = selectedImage{
+            guard let url = saveImageAndGetURL(with: selectedImage) else { return  }
+            saveFile(with: url)
+        }
+
+    }
+    
+    func saveImageAndGetURL(with image: UIImage) -> URL? {
+        
+        // Get the temporary directory URL
+        let temporaryDirectoryURL = FileManager.default.temporaryDirectory
+        let fileName = UUID().uuidString + ".png"
+        let temporaryFileURL = temporaryDirectoryURL.appendingPathComponent(fileName)
+        
+        // Convert the UIImage to PNG or JPEG data
+        if let imageData = image.pngData() { // Or image.jpegData(compressionQuality: 1.0) for JPEG
+            do {
+                // Write the image data to the file system
+                try imageData.write(to: temporaryFileURL)
+                return temporaryFileURL
+            } catch {
+                print("Error saving file: \(error)")
+            }
+        }
+        return nil
+    }
+    func saveFile(with sourceURL:URL) {
+           
+
+        print("NAME -> ",sourceURL.lastPathComponent)
+            // Create a temporary directory to store the file
+        let temporaryDirectoryURL = FileManager.default.temporaryDirectory
+        let temporaryFileURL = temporaryDirectoryURL.appendingPathComponent("SS"+sourceURL.lastPathComponent)
+
+            do {
+                // If a file already exists at the temporary location, remove it
+                if FileManager.default.fileExists(atPath: temporaryFileURL.path) {
+                    try FileManager.default.removeItem(at: temporaryFileURL)
+                }
+
+                // Copy the processed audio to the temporary location
+                try FileManager.default.copyItem(at: sourceURL, to: temporaryFileURL)
+
+                // Create a document picker to allow the user to choose where to save the file
+                let documentPicker = UIDocumentPickerViewController(forExporting: [sourceURL], asCopy: true)
+                documentPicker.delegate = self
+                documentPicker.shouldShowFileExtensions = true
+
+                // Present the document picker
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let window = windowScene.windows.first,
+                   let rootViewController = window.rootViewController {
+                    rootViewController.present(documentPicker, animated: true, completion: nil)
+                }
+            } catch {
+                print("Error preparing file for saving: \(error.localizedDescription)")
+            }
+        }
 
     private func addTextOverlay(to image: CIImage) -> CIImage {
         let renderSize = CGSize(width: image.extent.width, height: image.extent.height)
@@ -153,5 +300,12 @@ class ContentViewModel: ObservableObject {
 
         // Return the CIImage from the composited UIImage
         return CIImage(image: compositedImage!) ?? image
+    }
+}
+extension Optional {
+    func mLet(_ block: (Wrapped) -> Void) {
+        if let value = self {
+            block(value)
+        }
     }
 }

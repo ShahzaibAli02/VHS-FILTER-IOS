@@ -9,6 +9,14 @@ struct ContentView: View {
     
     var body: some View {
         VStack {
+            if viewModel.saved {
+                       Text("Saved successfully!")
+                           .padding()
+                           .background(Color.green)
+                           .cornerRadius(8)
+                           .foregroundColor(.white)
+                           .transition(.opacity) // Smooth fade in/out
+                   }
             HStack {
                 Spacer()
                 Button(action: {
@@ -49,6 +57,40 @@ struct ContentView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(height: 300)
+            }
+            
+            
+            if viewModel.selectedImage != nil || viewModel.videoURL != nil{
+                Button(action: {
+                    
+                    if viewModel.selectedImage != nil {
+                        viewModel.saveImage()
+                    }
+                    else {
+                        viewModel.saveVideo()
+                    }
+                   
+                }) {
+                    HStack (alignment: .center){
+                        Image(systemName: "square.and.arrow.down")
+                            .font(.largeTitle)
+                            .foregroundColor(.blue)
+                        Text("Save")
+                    }
+                }
+            }
+           
+        }
+        .sheet(isPresented: $viewModel.showLoading) {
+            ZStack {
+                // Transparent background
+                Color.black.opacity(0.5).edgesIgnoringSafeArea(.all)
+                
+                // Centered circular progress view
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    .scaleEffect(2) // You can adjust the size here
+                    .padding(40)    // Optional: padding for better spacing
             }
         }
         .padding()
